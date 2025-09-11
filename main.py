@@ -3,6 +3,13 @@ from matplotlib import pyplot as plt
 import numpy as np
 from PIL import Image
 
+
+def compare(imCalc,imTruth):
+    imDiff = (imTruth-imCalc)/((imTruth+imCalc)/2)
+    return(imDiff)
+
+
+
 testImageChannels = ["./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF",
                  "./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF",
                  "./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
@@ -17,6 +24,7 @@ grassRef = [.12,.17,.14] # 400, 550, 600
 OriginalDNs = []
 CorrectedDNs = []
 GroundTruthDNs = []
+ComparisonPercents = []
 
 j = 0
 #iterates through the three channels for image
@@ -35,29 +43,53 @@ for i in testImageChannels:
     # Modify array in some way
     gain = (p2-p1)/(dn2-dn1)
     print(gain)
+
     max = np.max(imDN)
     min = np.min(imDN[np.nonzero(imDN)])
     p = (imDN-min)*gain
+
+    #re-normalize to 0-1
+    max = np.max(p)
+    min = np.min(p)
+    p = (p - min)/(max-min)
 
     #append channel to list of corrected channels
     CorrectedDNs.append(p)
     j=j+1
 
 
+
+
 # setup Ground Truth image for calcs + Viewing
 for i in groundTruthChannels:
     im = Image.open(i)
     imCorrect = np.array(im)
+    imCorrect.astype(float)
     max = np.max(imCorrect)
     min = np.min(imCorrect)
     imCorrect = (imCorrect - min)/(max-min)
     GroundTruthDNs.append(imCorrect)
 
 
+for i in range(3):
+    ComparisonPercents.append(compare(OriginalDNs[i],CorrectedDNs[i]))
+
 # Display before and after images
 fig, imgs = plt.subplots(1, 3)
 fig.suptitle('Horizontally stacked subplots')
+
+#Original (Uncorrected)
 imgs[0].imshow(np.dstack((OriginalDNs[0],OriginalDNs[1],OriginalDNs[2])), interpolation='nearest')
+# Corrected
 imgs[1].imshow(np.dstack((CorrectedDNs[0],CorrectedDNs[1],CorrectedDNs[2])), interpolation='nearest')
+# Ground Truth
 imgs[2].imshow(np.dstack((GroundTruthDNs[0],GroundTruthDNs[1],GroundTruthDNs[2])), interpolation='nearest')
+
+
+# Shows percent difference between corrected and ground truth
+fig, ax = plt.subplots()
+ax.imshow(np.dstack((ComparisonPercents[0],ComparisonPercents[1],ComparisonPercents[2])),cmap="viridis")
+ax.axis("off")
 plt.show()
+
+
