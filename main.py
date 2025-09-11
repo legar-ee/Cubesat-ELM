@@ -3,9 +3,10 @@ from matplotlib import pyplot as plt
 import numpy as np
 from PIL import Image
 
-imageChannels = ["LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF",
-                 "LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF",
-                 "LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
+testImageChannels = ["./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF",
+                 "./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF",
+                 "./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
+groundTruthChannels = []
 
 # Reflactance value for RGB (0-1 scale)
 cloudRef = [.9,.9,.9] 
@@ -16,7 +17,7 @@ CorrectedDNs = []
 
 j = 0
 #iterates through the three channels for image
-for i in imageChannels:
+for i in testImageChannels:
     # Loads tiff file (1 channel)
     im = Image.open(i)
 
