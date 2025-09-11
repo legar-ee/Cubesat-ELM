@@ -3,7 +3,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 from PIL import Image
 
-imageChannels = ["LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF","LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF","LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
+imageChannels = ["LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF",
+                 "LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF",
+                 "LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
 OriginalDNs = []
 CorrectedDNs = []
 
