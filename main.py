@@ -34,7 +34,6 @@ for i in testImageChannels:
 
     # Converts imDNge into DN array 
     imDN = np.array(im)
-    OriginalDNs.append(imDN)
 
     # first point is clouds, second is grassy area [1062,5088] [4603,3333] 
     p2,p1= cloudRef[j],grassRef[j]
@@ -47,6 +46,11 @@ for i in testImageChannels:
     max = np.max(imDN)
     min = np.min(imDN[np.nonzero(imDN)])
     p = (imDN-min)*gain
+
+    #normalize DNs to 0-1 for display
+    imDN = (imDN - min)/(max-min)
+    OriginalDNs.append(imDN)
+
 
     #re-normalize to 0-1
     max = np.max(p)
@@ -72,11 +76,11 @@ for i in groundTruthChannels:
 
 
 for i in range(3):
-    ComparisonPercents.append(compare(OriginalDNs[i],CorrectedDNs[i]))
+    ComparisonPercents.append(compare(CorrectedDNs[i],GroundTruthDNs[i]))
 
 # Display before and after images
 fig, imgs = plt.subplots(1, 3)
-fig.suptitle('Horizontally stacked subplots')
+fig.suptitle('Before, After, GroundTruth')
 
 #Original (Uncorrected)
 imgs[0].imshow(np.dstack((OriginalDNs[0],OriginalDNs[1],OriginalDNs[2])), interpolation='nearest')
@@ -88,8 +92,10 @@ imgs[2].imshow(np.dstack((GroundTruthDNs[0],GroundTruthDNs[1],GroundTruthDNs[2])
 
 # Shows percent difference between corrected and ground truth
 fig, ax = plt.subplots()
-ax.imshow(np.dstack((ComparisonPercents[0],ComparisonPercents[1],ComparisonPercents[2])),cmap="viridis")
+im = ax.imshow(np.dstack((ComparisonPercents[0],ComparisonPercents[1],ComparisonPercents[2])),cmap="viridis")
 ax.axis("off")
+fig.suptitle('Calculated vs Groundtruth Percent Difference (0 - 1.0)')
+fig.colorbar(im)
 plt.show()
 
 
