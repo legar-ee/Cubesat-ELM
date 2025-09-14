@@ -10,12 +10,12 @@ def compare(imCalc,imTruth):
 
 
 
-testImageChannels = ["./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF",
-                 "./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF",
-                 "./TestImage\LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
-groundTruthChannels = ["./groundTruthImage\LT05_L2SP_203024_19950815_20200912_02_T1_SR_B3.TIF",
-                       "./groundTruthImage\LT05_L2SP_203024_19950815_20200912_02_T1_SR_B2.TIF",
-                       "./groundTruthImage\LT05_L2SP_203024_19950815_20200912_02_T1_SR_B1.TIF"]
+testImageChannels = ["./TestImage/LT05_L1TP_203024_19950815_20180217_01_T1_B3.TIF",
+                 "./TestImage/LT05_L1TP_203024_19950815_20180217_01_T1_B2.TIF",
+                 "./TestImage/LT05_L1TP_203024_19950815_20180217_01_T1_B1.TIF"]
+groundTruthChannels = ["./groundTruthImage/LT05_L2SP_203024_19950815_20200912_02_T1_SR_B3.TIF",
+                       "./groundTruthImage/LT05_L2SP_203024_19950815_20200912_02_T1_SR_B2.TIF",
+                       "./groundTruthImage/LT05_L2SP_203024_19950815_20200912_02_T1_SR_B1.TIF"]
 
 # Reflactance value for RGB (0-1 scale)
 cloudRef = [.9,.9,.9] 
