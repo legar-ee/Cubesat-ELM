@@ -32,14 +32,18 @@ for i in testImageChannels:
     # Loads tiff file (1 channel)
     im = Image.open(i)
 
-    # Converts imDNge into DN array 
+    # Converts image into DN array 
     imDN = np.array(im)
 
+    # Normalize DN to 0-1 float
+    min = np.min(imDN)
+    max = np.max(imDN)
+    imDN = (imDN-min)/(max-min)    
+
+    # calculate gain
     # first point is clouds, second is grassy area [1062,5088] [4603,3333] 
     p2,p1= cloudRef[j],grassRef[j]
     dn2,dn1= imDN[5088,1059], imDN[3333,4603] 
-
-    # Modify array in some way
     gain = (p2-p1)/(dn2-dn1)
     print(gain)
 
@@ -47,32 +51,22 @@ for i in testImageChannels:
     min = np.min(imDN[np.nonzero(imDN)])
     p = (imDN-min)*gain
 
-    #normalize DNs to 0-1 for display
-    imDN = (imDN - min)/(max-min)
-    OriginalDNs.append(imDN)
-
-
-    #re-normalize to 0-1
-    max = np.max(p)
-    min = np.min(p)
-    p = (p - min)/(max-min)
-
     #append channel to list of corrected channels
     CorrectedDNs.append(p)
+    OriginalDNs.append(imDN)
     j=j+1
 
 
-
-
-# setup Ground Truth image for calcs + Viewing
+# setup Ground Truth image for calcs + Viewing (0 - 1)
 for i in groundTruthChannels:
     im = Image.open(i)
-    imCorrect = np.array(im)
-    imCorrect.astype(float)
-    max = np.max(imCorrect)
-    min = np.min(imCorrect)
-    imCorrect = (imCorrect - min)/(max-min)
-    GroundTruthDNs.append(imCorrect)
+    imTruth = np.array(im)
+    imTruth.astype(float)
+    
+    max = np.max(imTruth)
+    min = np.min(imTruth)
+    imTruth = (imTruth - min)/(max-min)
+    GroundTruthDNs.append(imTruth)
 
 
 for i in range(3):
