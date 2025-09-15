@@ -23,6 +23,7 @@ grassRef = [.12,.17,.14] # 400, 550, 600
 
 OriginalDNs = []
 CorrectedDNs = []
+GroundTruthScalingFactors = []
 GroundTruthDNs = []
 ComparisonPercents = []
 
@@ -46,22 +47,28 @@ for i in testImageChannels:
     p = gain*imDN + offset # I removed the normalized DN 
 
     
-
     #append channel to list of corrected channels
     CorrectedDNs.append(p)
     OriginalDNs.append(imDN)
+    
+    # Find min and max for use with scaling groundtruth to same values
+    min = np.min(p)
+    max = np.max(p)
+    coeffTuple = (min,max)
+    print(coeffTuple)
+    GroundTruthScalingFactors.append(coeffTuple)
     j=j+1
 
 
 # setup Ground Truth image for calcs + Viewing (0 - 1)
+k = 0
 for i in groundTruthChannels:
-    im = Image.open(i)
-    imTruth = np.array(im)
-    imTruth.astype(float)
-    min = np.min(imTruth)
-    max = np.max(imTruth)
-    imTruth = (imTruth - min)/(max-min)
+    scale = GroundTruthScalingFactors[k]
+    im2 = Image.open(i)
+    imTruth = np.array(im2)
+    imTruth = (((imTruth - np.min(imTruth))/(np.max(imTruth)-np.min(imTruth)) * (scale[1]-scale[0]) + scale[0]))
     GroundTruthDNs.append(imTruth)
+    k=k+1
 
 
 
