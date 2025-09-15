@@ -5,7 +5,7 @@ from PIL import Image
 
 
 def compare(imCalc,imTruth):
-    imDiff = (imTruth-imCalc)/((imTruth+imCalc)/2)
+    imDiff = (imTruth-imCalc)/((imTruth+imCalc)/2 + 1e-7) # My IDE says there are some division issues so I add a small offset
     return(imDiff)
 
 
@@ -32,51 +32,44 @@ for i in testImageChannels:
     # Loads tiff file (1 channel)
     im = Image.open(i)
 
-    # Converts imDNge into DN array 
-    imDN = np.array(im)
-    OriginalDNs.append(imDN)
+    # Converts image into DN array 
+    imDN = np.array(im)  
 
+    # calculate gain
     # first point is clouds, second is grassy area [1062,5088] [4603,3333] 
     p2,p1= cloudRef[j],grassRef[j]
     dn2,dn1= imDN[5088,1059], imDN[3333,4603] 
-
-    # Modify array in some way
     gain = (p2-p1)/(dn2-dn1)
+    offset = p2 - gain*dn2 # Added the offest
     print(gain)
 
-    max = np.max(imDN)
-    min = np.min(imDN[np.nonzero(imDN)])
-    p = (imDN-min)*gain
+    p = gain*imDN + offset # I removed the normalized DN 
 
-    #re-normalize to 0-1
-    max = np.max(p)
-    min = np.min(p)
-    p = (p - min)/(max-min)
 
     #append channel to list of corrected channels
     CorrectedDNs.append(p)
+    OriginalDNs.append(imDN)
     j=j+1
 
 
-
-
-# setup Ground Truth image for calcs + Viewing
+# setup Ground Truth image for calcs + Viewing (0 - 1)
 for i in groundTruthChannels:
     im = Image.open(i)
-    imCorrect = np.array(im)
-    imCorrect.astype(float)
-    max = np.max(imCorrect)
-    min = np.min(imCorrect)
-    imCorrect = (imCorrect - min)/(max-min)
-    GroundTruthDNs.append(imCorrect)
+    imTruth = np.array(im)
+    imTruth.astype(float)
+    
+    max = np.max(imTruth)
+    min = np.min(imTruth)
+    imTruth = (imTruth - min)/(max-min)
+    GroundTruthDNs.append(imTruth)
 
 
 for i in range(3):
-    ComparisonPercents.append(compare(OriginalDNs[i],CorrectedDNs[i]))
+    ComparisonPercents.append(compare(CorrectedDNs[i],GroundTruthDNs[i]))
 
 # Display before and after images
 fig, imgs = plt.subplots(1, 3)
-fig.suptitle('Horizontally stacked subplots')
+fig.suptitle('Before, After, GroundTruth')
 
 #Original (Uncorrected)
 imgs[0].imshow(np.dstack((OriginalDNs[0],OriginalDNs[1],OriginalDNs[2])), interpolation='nearest')
@@ -88,8 +81,10 @@ imgs[2].imshow(np.dstack((GroundTruthDNs[0],GroundTruthDNs[1],GroundTruthDNs[2])
 
 # Shows percent difference between corrected and ground truth
 fig, ax = plt.subplots()
-ax.imshow(np.dstack((ComparisonPercents[0],ComparisonPercents[1],ComparisonPercents[2])),cmap="viridis")
+im = ax.imshow(np.dstack((ComparisonPercents[0],ComparisonPercents[1],ComparisonPercents[2])),cmap="viridis")
 ax.axis("off")
+fig.suptitle('Calculated vs Groundtruth Percent Difference (0 - 1.0)')
+fig.colorbar(im)
 plt.show()
 
 
