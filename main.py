@@ -5,7 +5,7 @@ from PIL import Image
 
 
 def compare(imCalc,imTruth):
-    imDiff = (imTruth-imCalc)/((imTruth+imCalc)/2 + 1e-7) # My IDE says there are some division issues so I add a small offset
+    imDiff = np.abs((imTruth-imCalc)/((imTruth+imCalc)/2) + 1e-7) # My IDE says there are some division issues so I add a small offset
     return(imDiff)
 
 
@@ -33,7 +33,7 @@ for i in testImageChannels:
     im = Image.open(i)
 
     # Converts image into DN array 
-    imDN = np.array(im)  
+    imDN = np.array(im)
 
     # calculate gain
     # first point is clouds, second is grassy area [1062,5088] [4603,3333] 
@@ -45,6 +45,9 @@ for i in testImageChannels:
 
     p = gain*imDN + offset # I removed the normalized DN 
 
+    # bring black-point to (0,0,0)
+    min = np.min(p)
+    p = p - min
 
     #append channel to list of corrected channels
     CorrectedDNs.append(p)
@@ -57,15 +60,15 @@ for i in groundTruthChannels:
     im = Image.open(i)
     imTruth = np.array(im)
     imTruth.astype(float)
-    
-    max = np.max(imTruth)
     min = np.min(imTruth)
+    max = np.max(imTruth)
     imTruth = (imTruth - min)/(max-min)
     GroundTruthDNs.append(imTruth)
 
 
-for i in range(3):
-    ComparisonPercents.append(compare(CorrectedDNs[i],GroundTruthDNs[i]))
+
+# compare percent difference by averaging percent difference at each pixel for all 3 channels
+comparisonImg = compare(CorrectedDNs[0],GroundTruthDNs[0])
 
 # Display before and after images
 fig, imgs = plt.subplots(1, 3)
@@ -79,11 +82,14 @@ imgs[1].imshow(np.dstack((CorrectedDNs[0],CorrectedDNs[1],CorrectedDNs[2])), int
 imgs[2].imshow(np.dstack((GroundTruthDNs[0],GroundTruthDNs[1],GroundTruthDNs[2])), interpolation='nearest')
 
 
+
+
+
 # Shows percent difference between corrected and ground truth
 fig, ax = plt.subplots()
-im = ax.imshow(np.dstack((ComparisonPercents[0],ComparisonPercents[1],ComparisonPercents[2])),cmap="viridis")
+im = ax.imshow(comparisonImg,cmap="viridis")
 ax.axis("off")
-fig.suptitle('Calculated vs Groundtruth Percent Difference (0 - 1.0)')
+fig.suptitle('Calculated vs Groundtruth Percent Difference (0 - 1.0) for Red Channel')
 fig.colorbar(im)
 plt.show()
 
