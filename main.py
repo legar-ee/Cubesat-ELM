@@ -5,7 +5,7 @@ from PIL import Image
 
 
 def compare(imCalc,imTruth):
-    imDiff = np.abs((imTruth-imCalc)/((imTruth+imCalc)/2) + 1e-7) # My IDE says there are some division issues so I add a small offset
+    imDiff = np.abs((imTruth-imCalc)/((imTruth+imCalc)/2 + 1e-7)) # Offset to avoid division issues
     return(imDiff)
 
 
@@ -41,10 +41,10 @@ for i in testImageChannels:
     p2,p1= cloudRef[j],grassRef[j]
     dn2,dn1= imDN[5088,1059], imDN[3333,4603] 
     gain = (p2-p1)/(dn2-dn1)
-    offset = p2 - gain*dn2 # Added the offest
+    offset = p2 - gain*dn2 
     print(gain)
 
-    p = gain*imDN + offset # I removed the normalized DN 
+    p = gain*imDN + offset 
 
     
     #append channel to list of corrected channels
