@@ -45,9 +45,7 @@ for i in testImageChannels:
 
     p = gain*imDN + offset 
 
-    # bring black-point to (0,0,0)
-    min = np.min(p)
-    p = p - min
+    
 
     #append channel to list of corrected channels
     CorrectedDNs.append(p)
