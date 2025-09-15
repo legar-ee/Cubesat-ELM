@@ -6,6 +6,9 @@ from PIL import Image
 
 def compare(imCalc,imTruth):
     imDiff = np.abs((imTruth-imCalc)/((imTruth+imCalc)/2 + 1e-7)) # Offset to avoid division issues
+    
+     # Gets rid of black border values messing with comparison
+    imDiff[imDiff > 1.1] = 0
     return(imDiff)
 
 
@@ -23,7 +26,6 @@ grassRef = [.12,.17,.14] # 400, 550, 600
 
 OriginalDNs = []
 CorrectedDNs = []
-GroundTruthScalingFactors = []
 GroundTruthDNs = []
 ComparisonPercents = []
 
@@ -35,6 +37,10 @@ for i in testImageChannels:
 
     # Converts image into DN array 
     imDN = np.array(im)
+    
+    # Scale Input DNs to 0-1 scale before any calculations
+    scale = 0,1
+    imDN = (((imDN - np.min(imDN))/(np.max(imDN)-np.min(imDN)) * (scale[1]-scale[0]) + scale[0]))
 
     # calculate gain
     # first point is clouds, second is grassy area [1062,5088] [4603,3333] 
@@ -51,22 +57,16 @@ for i in testImageChannels:
     CorrectedDNs.append(p)
     OriginalDNs.append(imDN)
     
-    # Find min and max for use with scaling groundtruth to same values
-    min = np.min(p)
-    max = np.max(p)
-    coeffTuple = (min,max)
-    print(coeffTuple)
-    GroundTruthScalingFactors.append(coeffTuple)
     j=j+1
 
 
 # setup Ground Truth image for calcs + Viewing (0 - 1)
 k = 0
 for i in groundTruthChannels:
-    scale = GroundTruthScalingFactors[k]
+    scale = 0,1
     im2 = Image.open(i)
     imTruth = np.array(im2)
-    imTruth = (((imTruth - np.min(imTruth))/(np.max(imTruth)-np.min(imTruth)) * (scale[1]-scale[0]) + scale[0]))
+    imTruth = (((imTruth - np.min(imTruth))/(np.max(imTruth)-np.min(imTruth)) * (scale[1]-scale[0]) + scale[0]))     
     GroundTruthDNs.append(imTruth)
     k=k+1
 
